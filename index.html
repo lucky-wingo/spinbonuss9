@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Luxury Fortune Wheel - Mobile Perfect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-light: #fbf5b7;
+            --gold-dark: #bf953f;
+            --gold-gradient: linear-gradient(to bottom, var(--gold-light), var(--gold-dark));
+            --text-cream: #f0e6d2;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            font-family: 'Playfair Display', serif;
+            color: var(--text-cream);
+            overflow: hidden;
+            background-image: url('https://s.imgz.io/2026/03/03/8971a3894bf76809a01e85c3144ceafcb082af02df37329a.jpg'); 
+            background-size: cover;      
+            background-position: center; 
+            background-repeat: no-repeat; 
+            box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.6); 
+        }
+
+        h1 {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: clamp(1.8rem, 6vw, 3rem); 
+            text-align: center;
+            margin-bottom: 25px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- ส่วนของมาสคอต --- */
+        .mascot-container {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            /* แก้ไข Z-index เป็น 5 ให้อยู่ด้านหน้าวงล้อเสมอ */
+            z-index: 5; 
+            pointer-events: none; 
+        }
+        .mascot-container.left { left: 2%; }
+        .mascot-container.right { right: 2%; }
+
+        .mascot {
+            width: clamp(90px, 25vw, 180px); 
+            height: auto;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); 
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+        .bouncy {
+            animation: bounce 3s infinite ease-in-out;
+        }
+        .mascot-container.right .bouncy {
+            animation-delay: 0.5s; 
+        }
+        .mascot-exciting {
+            animation-duration: 0.8s !important; 
+        }
+
+        .wheel-wrapper-outer {
+            position: relative;
+            width: 100%;
+            max-width: 400px; 
+            padding: 10px; 
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--gold-dark), var(--gold-light), var(--gold-dark), 
+                var(--gold-light), var(--gold-dark)
+            );
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.4), 
+                inset 0 0 15px rgba(0,0,0,0.8),
+                0 15px 30px rgba(0,0,0,0.8);
+            z-index: 2; /* วงล้ออยู่ z-index 2 (อยู่หลังมาสคอต) */
+        }
+
+        .wheel-wrapper-inner {
+             position: relative;
+             width: 100%;
+             aspect-ratio: 1 / 1; 
+             border-radius: 50%;
+             border: 4px solid #2a2a2a;
+             box-sizing: border-box;
+             overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;  
+            height: 100%;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.1) 100%);
+        }
+        
+        .pointer-container {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.85); 
+            z-index: 10;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+        }
+        
+        .pointer-body {
+            width: 50px;
+            height: 50px;
+            background: var(--gold-gradient);
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            position: relative;
+        }
+        
+        .pointer-jewel {
+             position: absolute;
+             top: 5px;
+             left: 50%;
+             transform: translateX(-50%);
+             width: 20px;
+             height: 20px;
+             background: radial-gradient(circle at 30% 30%, #ff4d4d, #a70000);
+             border-radius: 50%;
+             border: 2px solid var(--gold-light);
+        }
+
+        #spinBtn {
+            margin-top: 30px;
+            padding: clamp(12px, 3vw, 18px) clamp(30px, 8vw, 60px);
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: clamp(18px, 5vw, 24px);
+            font-weight: bold;
+            color: #2c0000;
+            background: var(--gold-gradient);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 
+                inset 0 2px 2px rgba(255,255,255,0.4),
+                inset 0 -2px 5px rgba(0,0,0,0.2),
+                0 8px 15px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            z-index: 6; /* ให้อยู่หน้ามาสคอต เผื่อกันคลิกไม่โดน */
+        }
+
+        #spinBtn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 
+                inset 0 2px 2px rgba(255,255,255,0.6),
+                0 12px 20px rgba(191, 149, 63, 0.5);
+        }
+
+        #spinBtn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+            text-shadow: none;
+            opacity: 0.9;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: clamp(20px, 6vw, 32px);
+            font-weight: bold;
+            color: var(--gold-light);
+            height: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            font-family: 'Cinzel Decorative', cursive;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        /* --- ปรับแต่งมาสคอตบนมือถือโดยเฉพาะ --- */
+        @media (max-width: 480px) {
+            .mascot-container {
+                top: 60%; /* เลื่อนลงมาอยู่ช่วงล่างของวงล้อ จะได้ไม่บังตัวเลขด้านใน */
+            }
+            .mascot-container.left { left: -10px; } /* ดึงมาชิดขอบจอ */
+            .mascot-container.right { right: -10px; }
+            .mascot { 
+                width: 90px; /* ฟิกขนาดให้กำลังดี ไม่ใหญ่จนล้นจอ */
+                filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); 
+            } 
+        }
+    </style>
+</head>
+<body>
+
+    <h1>The Royal Wheel</h1>
+
+    <div class="mascot-container left">
+        <img src="https://img2.pic.in.th/-267654e8a773f2dd25.png" alt="Lucky Mascot Left" class="mascot bouncy">
+    </div>
+    <div class="mascot-container right">
+        <img src="https://img5.pic.in.th/file/secure-sv1/-2528a13b3bc8f37209.png" alt="Lucky Mascot Right" class="mascot bouncy">
+    </div>
+
+    <div class="wheel-wrapper-outer">
+        <div class="pointer-container">
+            <div class="pointer-body">
+                <div class="pointer-jewel"></div>
+            </div>
+        </div>
+        <div class="wheel-wrapper-inner">
+            <canvas id="luxuryWheel" width="500" height="500"></canvas>
+        </div>
+    </div>
+
+    <button id="spinBtn">Spin to Win</button>
+    <div id="result"></div>
+    
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("luxuryWheel");
+        const ctx = canvas.getContext("2d");
+        const spinBtn = document.getElementById("spinBtn");
+        const resultDiv = document.getElementById("result");
+        const mascots = document.querySelectorAll('.mascot'); 
+
+        const tickSoundUrl = 'https://assets.mixkit.co/active_storage/sfx/2073/2073-preview.mp3'; 
+        const winSoundUrl = 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'; 
+        const winAudio = new Audio(winSoundUrl);
+
+        if (localStorage.getItem("wheelSpinLocked") === "true") {
+            spinBtn.disabled = true;
+            spinBtn.innerText = "คุณได้รับสิทธิ์ไปแล้ว";
+        }
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+
+        const prizes = ["1 🪙", "5 🪙", "10 🪙", "50 🪙", "100 🪙", "500 🪙", "1000 🪙", "10000 🪙"];
+        const probabilities = [45, 45, 10, 0, 0, 0, 0, 0];
+        const segmentColors = [
+            "#D90429", "#00509E", "#00897B", "#7B2CBF", 
+            "#D90429", "#00509E", "#00897B", "#7B2CBF"
+        ];
+        
+        const numSegments = prizes.length;
+        const arcSize = (2 * Math.PI) / numSegments;
+        let currentAngle = 0;
+        let isSpinning = false;
+        let lastPassedSegment = -1; 
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = "#1a1a1a";
+            ctx.fill();
+
+            for (let i = 0; i < numSegments; i++) {
+                const angle = currentAngle + i * arcSize;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius - 5, angle, angle + arcSize);
+                
+                let grd = ctx.createRadialGradient(centerX, centerY, radius/4, centerX, centerY, radius);
+                grd.addColorStop(0, segmentColors[i]);
+                grd.addColorStop(1, adjustColor(segmentColors[i], -20));
+                
+                ctx.fillStyle = grd;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
+                ctx.strokeStyle = "#bf953f";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 28px 'Playfair Display'"; 
+                ctx.shadowColor = "rgba(0,0,0,0.9)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.fillText(prizes[i], radius - 40, 8); 
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 60, 0, 2 * Math.PI);
+            let hubGrad = ctx.createLinearGradient(centerX-60, centerY-60, centerX+60, centerY+60);
+            hubGrad.addColorStop(0, "#fbf5b7");
+            hubGrad.addColorStop(0.5, "#bf953f");
+            hubGrad.addColorStop(1, "#8a6e2f");
+            ctx.fillStyle = hubGrad;
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
+            ctx.fillStyle = "#2c0000";
+            ctx.shadowBlur = 0;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#fbf5b7";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = "#bf953f";
+            ctx.font = "bold 24px 'Cinzel Decorative'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("VIP", centerX, centerY);
+        }
+
+        function adjustColor(color, amount) {
+            return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+        }
+
+        function getWinnerIndex() {
+            let rand = Math.random() * 100;
+            let sum = 0;
+            for (let i = 0; i < probabilities.length; i++) {
+                sum += probabilities[i];
+                if (rand <= sum) return i;
+            }
+            return 0;
+        }
+
+        function spin() {
+            if (isSpinning || localStorage.getItem("wheelSpinLocked") === "true") return;
+            isSpinning = true;
+            
+            localStorage.setItem("wheelSpinLocked", "true");
+            spinBtn.disabled = true;
+            
+            resultDiv.innerText = "";
+            resultDiv.style.opacity = 0;
+            
+            mascots.forEach(mascot => mascot.classList.add('mascot-exciting'));
+
+            const winnerIndex = getWinnerIndex();
+            const spinTimeTotal = Math.random() * 5000 + 5000; 
+
+            const fullRotations = (Math.floor(Math.random() * 10) + 15) * Math.PI * 2; 
+            const offset = (Math.random() * 0.6 + 0.2) * arcSize; 
+            const targetAngle = (1.5 * Math.PI) - (winnerIndex * arcSize) - offset;
+            
+            const distance = fullRotations + targetAngle - currentAngle;
+            let startTime = null;
+            const startAngle = currentAngle;
+
+            function animateSpin(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const runtime = timestamp - startTime;
+                let progress = runtime / spinTimeTotal;
+                if (progress >= 1) progress = 1;
+                
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                currentAngle = startAngle + distance * easeOut;
+                drawWheel();
+                
+                const degrees = (currentAngle * 180) / Math.PI;
+                const arcDegrees = (arcSize * 180) / Math.PI;
+                const currentIndex = Math.floor((360 - (degrees % 360) + 270) % 360 / arcDegrees);
+
+                if (lastPassedSegment !== currentIndex) {
+                    let tick = new Audio(tickSoundUrl);
+                    tick.volume = 0.3; 
+                    tick.play().catch(e => console.log("Audio play prevented"));
+                    lastPassedSegment = currentIndex;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    isSpinning = false;
+                    spinBtn.innerText = "คุณได้รับสิทธิ์ไปแล้ว";
+                    resultDiv.innerText = `ยินดีด้วย! คุณได้รับ ${prizes[winnerIndex]}`;
+                    resultDiv.style.opacity = 1;
+                    
+                    mascots.forEach(mascot => mascot.classList.remove('mascot-exciting'));
+                    
+                    winAudio.volume = 0.7; 
+                    winAudio.play().catch(e => console.log("Audio play prevented"));
+                    fireConfetti();
+                }
+            }
+            requestAnimationFrame(animateSpin);
+        }
+
+        drawWheel();
+        spinBtn.addEventListener("click", spin);
+
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiParticles = [];
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        function fireConfetti() {
+            const colors = ['#fbf5b7', '#bf953f', '#D90429', '#00509E', '#00897B'];
+            for (let i = 0; i < 100; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2 + 100,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 1) * 15 - 5,
+                    gravity: 0.4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+            requestAnimationFrame(updateConfetti);
+        }
+
+        function updateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            confettiParticles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotationSpeed;
+
+                confettiCtx.save();
+                confettiCtx.translate(p.x, p.y);
+                confettiCtx.rotate(p.rotation * Math.PI / 180);
+                confettiCtx.fillStyle = p.color;
+                confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                confettiCtx.restore();
+
+                if (p.y > confettiCanvas.height) {
+                    confettiParticles.splice(index, 1);
+                }
+            });
+
+            if (confettiParticles.length > 0) {
+                requestAnimationFrame(updateConfetti);
+            }
+        }
+    </script>
+</body>
+</html>
