@@ -46,6 +46,40 @@
             z-index: 2;
         }
 
+        /* --- Overlay สำหรับกรอกเบอร์โทร --- */
+        #authOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .auth-box {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid var(--gold-dark);
+            text-align: center;
+            width: 85%;
+            max-width: 350px;
+            box-shadow: 0 0 20px rgba(191, 149, 63, 0.3);
+        }
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px solid var(--gold-dark);
+            background: #000;
+            color: #fff;
+            font-size: 1.2rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* --- สไตล์ส่วนตัววงล้อ --- */
         .mascot-container {
             position: absolute;
             top: 50%;
@@ -55,23 +89,14 @@
         }
         .mascot-container.left { left: 2%; }
         .mascot-container.right { right: 2%; }
-
-        .mascot {
-            width: clamp(90px, 25vw, 180px); 
-            height: auto;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); 
-        }
+        .mascot { width: clamp(90px, 25vw, 180px); height: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-15px) rotate(2deg); }
         }
-        .bouncy {
-            animation: bounce 3s infinite ease-in-out;
-        }
-        .mascot-exciting {
-            animation-duration: 0.8s !important; 
-        }
+        .bouncy { animation: bounce 3s infinite ease-in-out; }
+        .mascot-exciting { animation-duration: 0.8s !important; }
 
         .wheel-wrapper-outer {
             position: relative;
@@ -80,10 +105,7 @@
             padding: 10px; 
             box-sizing: border-box;
             border-radius: 50%;
-            background: conic-gradient(
-                var(--gold-dark), var(--gold-light), var(--gold-dark), 
-                var(--gold-light), var(--gold-dark)
-            );
+            background: conic-gradient(var(--gold-dark), var(--gold-light), var(--gold-dark), var(--gold-light), var(--gold-dark));
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), inset 0 0 15px rgba(0,0,0,0.8), 0 15px 30px rgba(0,0,0,0.8);
             z-index: 2;
         }
@@ -98,11 +120,7 @@
              overflow: hidden;
         }
 
-        canvas {
-            display: block;
-            width: 100%;  
-            height: 100%;
-        }
+        canvas { display: block; width: 100%; height: 100%; }
         
         .pointer-container {
             position: absolute;
@@ -118,7 +136,6 @@
             height: 50px;
             background: var(--gold-gradient);
             clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-            position: relative;
         }
 
         #spinBtn {
@@ -138,43 +155,65 @@
             z-index: 6;
         }
 
-        #spinBtn:disabled {
-            background: #555;
-            color: #888;
-            cursor: not-allowed;
-            opacity: 0.9;
+        #spinBtn:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+        /* --- สไตล์ Modal ประวัติ --- */
+        #historyBtn {
+            margin-top: 15px;
+            background: transparent;
+            border: 1px solid var(--gold-dark);
+            color: var(--gold-dark);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            z-index: 6;
         }
+
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%; max-width: 450px;
+            background: #1a1a1a;
+            border: 2px solid var(--gold-dark);
+            border-radius: 15px;
+            padding: 20px;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .history-table th, .history-table td { padding: 10px; border-bottom: 1px solid #333; text-align: left; color: #eee; }
+        .history-table th { color: var(--gold-dark); }
 
         #result {
             margin-top: 20px;
             font-size: clamp(20px, 6vw, 32px);
             font-weight: bold;
             color: var(--gold-light);
-            height: 40px;
+            min-height: 40px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
             font-family: 'Cinzel Decorative', cursive;
             text-align: center;
-            opacity: 0;
-            transition: opacity 1s ease-in;
         }
         
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 99;
-        }
-
-        @media (max-width: 480px) {
-            .mascot-container { top: 60%; }
-            .mascot { width: 90px; } 
-        }
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99; }
     </style>
 </head>
 <body>
+
+    <div id="authOverlay">
+        <div class="auth-box">
+            <h2 style="color:var(--gold-light); font-family:'Cinzel Decorative'">THE ROYAL WHEEL</h2>
+            <p>กรุณากรอกเบอร์โทรศัพท์เพื่อเริ่มกิจกรรม</p>
+            <input type="tel" id="userPhone" placeholder="08XXXXXXXX" maxlength="10">
+            <button id="startBtn" style="padding:10px 20px; background:var(--gold-gradient); border:none; width:100%; font-weight:bold; cursor:pointer;">ยืนยันเบอร์โทร</button>
+        </div>
+    </div>
 
     <h1>The Royal Wheel</h1>
 
@@ -195,20 +234,32 @@
     </div>
 
     <button id="spinBtn">Spin to Win</button>
+    <button id="historyBtn">📜 ประวัติรางวัลของคุณ</button>
     <div id="result"></div>
     
+    <div id="historyModal" class="history-modal">
+        <h2 style="color:var(--gold-light); text-align:center">History</h2>
+        <table class="history-table">
+            <thead><tr><th>วัน/เวลา</th><th>รางวัล</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+        <button onclick="document.getElementById('historyModal').style.display='none'" style="margin-top:20px; width:100%; padding:10px;">ปิด</button>
+    </div>
+
     <canvas id="confetti-canvas"></canvas>
 
     <script>
+        // *** ใส่ URL ของ Google Apps Script ของคุณที่นี่ ***
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZdUtmN32BnLryvLB_80-reQTCoDvmIjxmrikypzgEC5f_54uVwE5aOGGXxCKOj8sQSA/exec';
+
         const canvas = document.getElementById("luxuryWheel");
         const ctx = canvas.getContext("2d");
         const spinBtn = document.getElementById("spinBtn");
         const resultDiv = document.getElementById("result");
         const mascots = document.querySelectorAll('.mascot'); 
+        let customerPhone = "";
 
-        const tickSoundUrl = 'https://assets.mixkit.co/active_storage/sfx/2073/2073-preview.mp3'; 
-        const winSoundUrl = 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'; 
-        const winAudio = new Audio(winSoundUrl);
+        const winAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
 
         const MAX_SPINS_PER_DAY = 4;
         const centerX = canvas.width / 2;
@@ -218,38 +269,41 @@
         const prizes = ["10 💸", "15 💸", "20 💸", "50 💸", "100 💸", "500 💸", "1000 💸", "10000 💸"];
         const probabilities = [85, 7, 7.5, 0.1, 0.1, 0.1, 0.1, 0.1]; 
         const segmentColors = ["#D90429", "#00509E", "#00897B", "#7B2CBF", "#D90429", "#00509E", "#00897B", "#7B2CBF"];
-        
         const numSegments = prizes.length;
         const arcSize = (2 * Math.PI) / numSegments;
         let currentAngle = 0;
         let isSpinning = false;
-        let lastPassedSegment = -1; 
 
-        // --- ระบบตรวจสอบโควตารายวัน ---
+        // ระบบยืนยันตัวตน
+        document.getElementById('startBtn').addEventListener('click', () => {
+            const input = document.getElementById('userPhone').value;
+            if (input.length >= 9) {
+                customerPhone = input;
+                document.getElementById('authOverlay').style.display = 'none';
+                updateButtonState();
+            } else {
+                alert('กรุณากรอกเบอร์โทรให้ถูกต้อง');
+            }
+        });
+
         function getDailySpins() {
             const today = new Date().toDateString();
-            const storedDate = localStorage.getItem('spinDate');
-            let count = parseInt(localStorage.getItem('spinCount') || '0');
-
-            if (storedDate !== today) {
-                // ขึ้นวันใหม่ รีเซ็ตเป็น 0
+            if (localStorage.getItem('spinDate') !== today) {
                 localStorage.setItem('spinDate', today);
                 localStorage.setItem('spinCount', '0');
                 return 0;
             }
-            return count;
+            return parseInt(localStorage.getItem('spinCount') || '0');
         }
 
         function updateButtonState() {
-            const spinsDone = getDailySpins();
-            const spinsLeft = MAX_SPINS_PER_DAY - spinsDone;
-
+            const spinsLeft = MAX_SPINS_PER_DAY - getDailySpins();
             if (spinsLeft <= 0) {
                 spinBtn.disabled = true;
-                spinBtn.innerText = "ครบโควตา 4 ครั้งต่อวันแล้ว";
+                spinBtn.innerText = "หมดโควตาวันนี้";
             } else {
                 spinBtn.disabled = false;
-                spinBtn.innerText = `หมุนเลย (เหลือ ${spinsLeft} ครั้ง)`;
+                spinBtn.innerText = `หมุนเลย (เหลือ ${spinsLeft})`;
             }
         }
 
@@ -278,31 +332,28 @@
         }
 
         function spin() {
-            const spinsDone = getDailySpins();
-            if (isSpinning || spinsDone >= MAX_SPINS_PER_DAY) return;
+            if (isSpinning || getDailySpins() >= MAX_SPINS_PER_DAY) return;
             
             isSpinning = true;
             spinBtn.disabled = true;
-            spinBtn.innerText = "กำลังหมุน...";
             resultDiv.innerText = "";
-            resultDiv.style.opacity = 0;
-            mascots.forEach(mascot => mascot.classList.add('mascot-exciting'));
+            mascots.forEach(m => m.classList.add('mascot-exciting'));
 
             const winnerIndex = getWinnerIndex();
-            const spinTimeTotal = 5000; // หมุน 5 วินาที
             const fullRotations = (Math.floor(Math.random() * 5) + 10) * Math.PI * 2; 
             const offset = (Math.random() * 0.6 + 0.2) * arcSize; 
             const targetAngle = (1.5 * Math.PI) - (winnerIndex * arcSize) - offset;
             const distance = fullRotations + targetAngle - (currentAngle % (Math.PI * 2));
             
             let startTime = null;
+            const spinTimeTotal = 5000;
             const startAngle = currentAngle;
 
             function animateSpin(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const runtime = timestamp - startTime;
                 let progress = runtime / spinTimeTotal;
-                if (progress >= 1) progress = 1;
+                if (progress > 1) progress = 1;
                 
                 const easeOut = 1 - Math.pow(1 - progress, 4); 
                 currentAngle = startAngle + distance * easeOut;
@@ -312,14 +363,17 @@
                     requestAnimationFrame(animateSpin);
                 } else {
                     isSpinning = false;
+                    localStorage.setItem('spinCount', (getDailySpins() + 1).toString());
                     
-                    // บันทึกจำนวนครั้งที่หมุน
-                    localStorage.setItem('spinCount', (spinsDone + 1).toString());
+                    const prizeName = prizes[winnerIndex];
+                    resultDiv.innerText = `ยินดีด้วย! ได้รับ ${prizeName}`;
+                    
+                    // บันทึกและส่งข้อมูล
+                    saveToHistory(prizeName);
+                    sendToGoogleSheet(prizeName);
+                    
                     updateButtonState();
-
-                    resultDiv.innerText = `ยินดีด้วย! คุณได้รับ ${prizes[winnerIndex]}`;
-                    resultDiv.style.opacity = 1;
-                    mascots.forEach(mascot => mascot.classList.remove('mascot-exciting'));
+                    mascots.forEach(m => m.classList.remove('mascot-exciting'));
                     winAudio.play().catch(e => {});
                     fireConfetti();
                 }
@@ -337,9 +391,35 @@
             return 0;
         }
 
-        drawWheel();
-        updateButtonState();
+        // --- ส่วนเสริม: บันทึกข้อมูล ---
+        function saveToHistory(prize) {
+            let history = JSON.parse(localStorage.getItem('spinHistory') || '[]');
+            const now = new Date();
+            history.unshift({ date: now.toLocaleString(), prize: prize });
+            localStorage.setItem('spinHistory', JSON.stringify(history.slice(0, 20)));
+        }
+
+        function sendToGoogleSheet(prizeName) {
+            if (!SCRIPT_URL.startsWith('http')) return;
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: customerPhone, prize: prizeName })
+            });
+        }
+
+        // --- UI Events ---
+        document.getElementById('historyBtn').addEventListener('click', () => {
+            const history = JSON.parse(localStorage.getItem('spinHistory') || '[]');
+            const body = document.getElementById('historyBody');
+            body.innerHTML = history.map(h => `<tr><td>${h.date}</td><td>${h.prize}</td></tr>`).join('') 
+                             || '<tr><td colspan="2">ไม่พบข้อมูล</td></tr>';
+            document.getElementById('historyModal').style.display = 'block';
+        });
+
         spinBtn.addEventListener("click", spin);
+        drawWheel();
 
         // Confetti Engine
         const confettiCanvas = document.getElementById('confetti-canvas');
@@ -351,10 +431,8 @@
             confettiCanvas.height = window.innerHeight;
             for (let i = 0; i < 100; i++) {
                 confettiParticles.push({
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 1) * 15,
+                    x: window.innerWidth / 2, y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 1) * 15,
                     color: ['#fbf5b7', '#bf953f', '#D90429'][Math.floor(Math.random() * 3)]
                 });
             }
@@ -374,9 +452,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
