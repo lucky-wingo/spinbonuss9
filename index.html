@@ -46,12 +46,10 @@
             z-index: 2;
         }
 
-        /* --- ส่วนของมาสคอต --- */
         .mascot-container {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            /* แก้ไข Z-index เป็น 5 ให้อยู่ด้านหน้าวงล้อเสมอ */
             z-index: 5; 
             pointer-events: none; 
         }
@@ -93,7 +91,7 @@
                 0 0 30px rgba(255, 215, 0, 0.4), 
                 inset 0 0 15px rgba(0,0,0,0.8),
                 0 15px 30px rgba(0,0,0,0.8);
-            z-index: 2; /* วงล้ออยู่ z-index 2 (อยู่หลังมาสคอต) */
+            z-index: 2;
         }
 
         .wheel-wrapper-inner {
@@ -110,7 +108,6 @@
             display: block;
             width: 100%;  
             height: 100%;
-            background-image: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.1) 100%);
         }
         
         .pointer-container {
@@ -160,7 +157,7 @@
                 0 8px 15px rgba(0,0,0,0.6);
             transition: all 0.3s ease;
             text-transform: uppercase;
-            z-index: 6; /* ให้อยู่หน้ามาสคอต เผื่อกันคลิกไม่โดน */
+            z-index: 6;
         }
 
         #spinBtn:hover:not(:disabled) {
@@ -175,7 +172,6 @@
             color: #888;
             cursor: not-allowed;
             box-shadow: none;
-            text-shadow: none;
             opacity: 0.9;
         }
 
@@ -204,17 +200,11 @@
             z-index: 99;
         }
 
-        /* --- ปรับแต่งมาสคอตบนมือถือโดยเฉพาะ --- */
         @media (max-width: 480px) {
-            .mascot-container {
-                top: 60%; /* เลื่อนลงมาอยู่ช่วงล่างของวงล้อ จะได้ไม่บังตัวเลขด้านใน */
-            }
-            .mascot-container.left { left: -10px; } /* ดึงมาชิดขอบจอ */
+            .mascot-container { top: 60%; }
+            .mascot-container.left { left: -10px; }
             .mascot-container.right { right: -10px; }
-            .mascot { 
-                width: 90px; /* ฟิกขนาดให้กำลังดี ไม่ใหญ่จนล้นจอ */
-                filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); 
-            } 
+            .mascot { width: 90px; } 
         }
     </style>
 </head>
@@ -256,17 +246,14 @@
         const winSoundUrl = 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'; 
         const winAudio = new Audio(winSoundUrl);
 
-        if (localStorage.getItem("wheelSpinLocked") === "true") {
-            spinBtn.disabled = true;
-            spinBtn.innerText = "คุณได้รับสิทธิ์ไปแล้ว";
-        }
-
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = canvas.width / 2;
 
         const prizes = ["10 🪙", "15 🪙", "20 🪙", "50 🪙", "100 🪙", "500 🪙", "1000 🪙", "10000 🪙"];
-        const probabilities = [90, 10, 0, 0, 0, 0, 0, 0];
+        // ปรับโอกาสชนะให้สมดุล (สามารถแก้ตัวเลขได้ตามต้องการ)
+        const probabilities = [40, 30, 15, 8, 4, 2, 0.9, 0.1]; 
+        
         const segmentColors = [
             "#D90429", "#00509E", "#00897B", "#7B2CBF", 
             "#D90429", "#00509E", "#00897B", "#7B2CBF"
@@ -318,6 +305,7 @@
                 ctx.restore();
             }
 
+            // VIP Hub
             ctx.beginPath();
             ctx.arc(centerX, centerY, 60, 0, 2 * Math.PI);
             let hubGrad = ctx.createLinearGradient(centerX-60, centerY-60, centerX+60, centerY+60);
@@ -325,19 +313,11 @@
             hubGrad.addColorStop(0.5, "#bf953f");
             hubGrad.addColorStop(1, "#8a6e2f");
             ctx.fillStyle = hubGrad;
-            ctx.shadowColor = "rgba(0,0,0,0.5)";
-            ctx.shadowBlur = 15;
             ctx.fill();
             ctx.beginPath();
             ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
             ctx.fillStyle = "#2c0000";
-            ctx.shadowBlur = 0;
             ctx.fill();
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
-            ctx.strokeStyle = "#fbf5b7";
-            ctx.lineWidth = 2;
-            ctx.stroke();
             ctx.fillStyle = "#bf953f";
             ctx.font = "bold 24px 'Cinzel Decorative'";
             ctx.textAlign = "center";
@@ -360,11 +340,11 @@
         }
 
         function spin() {
-            if (isSpinning || localStorage.getItem("wheelSpinLocked") === "true") return;
+            if (isSpinning) return;
             isSpinning = true;
             
-            localStorage.setItem("wheelSpinLocked", "true");
             spinBtn.disabled = true;
+            spinBtn.innerText = "หมุนลุ้นโชค...";
             
             resultDiv.innerText = "";
             resultDiv.style.opacity = 0;
@@ -372,13 +352,16 @@
             mascots.forEach(mascot => mascot.classList.add('mascot-exciting'));
 
             const winnerIndex = getWinnerIndex();
-            const spinTimeTotal = Math.random() * 5000 + 5000; 
+            
+            // --- ปรับเวลาหมุนเป็น 5 วินาที ---
+            const spinTimeTotal = 5000; 
 
-            const fullRotations = (Math.floor(Math.random() * 10) + 15) * Math.PI * 2; 
+            // คำนวณความแรงเพื่อให้หยุดที่รางวัลที่เลือกไว้
+            const fullRotations = (Math.floor(Math.random() * 5) + 10) * Math.PI * 2; 
             const offset = (Math.random() * 0.6 + 0.2) * arcSize; 
             const targetAngle = (1.5 * Math.PI) - (winnerIndex * arcSize) - offset;
             
-            const distance = fullRotations + targetAngle - currentAngle;
+            const distance = fullRotations + targetAngle - (currentAngle % (Math.PI * 2));
             let startTime = null;
             const startAngle = currentAngle;
 
@@ -388,18 +371,20 @@
                 let progress = runtime / spinTimeTotal;
                 if (progress >= 1) progress = 1;
                 
-                const easeOut = 1 - Math.pow(1 - progress, 3);
+                // Easing Quartic Out: ชะลอตัวนุ่มๆ ช่วงท้าย
+                const easeOut = 1 - Math.pow(1 - progress, 4); 
                 currentAngle = startAngle + distance * easeOut;
                 drawWheel();
                 
+                // ระบบเสียง Tick
                 const degrees = (currentAngle * 180) / Math.PI;
                 const arcDegrees = (arcSize * 180) / Math.PI;
                 const currentIndex = Math.floor((360 - (degrees % 360) + 270) % 360 / arcDegrees);
 
                 if (lastPassedSegment !== currentIndex) {
                     let tick = new Audio(tickSoundUrl);
-                    tick.volume = 0.3; 
-                    tick.play().catch(e => console.log("Audio play prevented"));
+                    tick.volume = 0.2; 
+                    tick.play().catch(e => {});
                     lastPassedSegment = currentIndex;
                 }
                 
@@ -407,14 +392,16 @@
                     requestAnimationFrame(animateSpin);
                 } else {
                     isSpinning = false;
-                    spinBtn.innerText = "คุณได้รับสิทธิ์ไปแล้ว";
+                    spinBtn.disabled = false;
+                    spinBtn.innerText = "Spin to Win"; 
+                    
                     resultDiv.innerText = `ยินดีด้วย! คุณได้รับ ${prizes[winnerIndex]}`;
                     resultDiv.style.opacity = 1;
                     
                     mascots.forEach(mascot => mascot.classList.remove('mascot-exciting'));
                     
-                    winAudio.volume = 0.7; 
-                    winAudio.play().catch(e => console.log("Audio play prevented"));
+                    winAudio.volume = 0.6; 
+                    winAudio.play().catch(e => {});
                     fireConfetti();
                 }
             }
@@ -424,6 +411,7 @@
         drawWheel();
         spinBtn.addEventListener("click", spin);
 
+        // Confetti Engine
         const confettiCanvas = document.getElementById('confetti-canvas');
         const confettiCtx = confettiCanvas.getContext('2d');
         let confettiParticles = [];
@@ -480,5 +468,4 @@
         }
     </script>
 </body>
-
 </html>
